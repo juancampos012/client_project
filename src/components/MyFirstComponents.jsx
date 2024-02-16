@@ -1,68 +1,53 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 import { Card } from "antd";
 import "./MyFirstComponents.scss"
 
 export const MyFirstComponents = () => {
-    const card_content = [
-        {
-          title: "Card 1", 
-          size: "small", 
-          extra: (<html>
-                    <head>
-                    </head>
-                    <body>
-                        <a href='#'>Ver mas</a>
-                    </body>
-                  </html>)
-        },
-        {
-          title: "Card 2", 
-          size: "small", 
-          extra: (<html>
-                    <head>
-                    </head>
-                    <body>
-                        <a href='#'>Ver mas</a>
-                    </body>
-                  </html>)
-        },
-        {
-          title: "Card 3", 
-          size: "small", 
-          extra: (<html>
-                    <head>
-                    </head>
-                    <body>
-                        <a href='#'>Ver mas</a>
-                    </body>
-                  </html>)
-        },
-        {
-          title: "Card 4", 
-          size: "small", 
-          extra: (<html>
-                    <head>
-                    </head>
-                    <body>
-                        <a href='#'>Ver mas</a>
-                    </body>
-                  </html>)
-        }
-    ];
+  const [card_content, setCardContent] = useState([]);
+
+  useEffect(() => {
+    fetch('https://pokeapi.co/api/v2/pokemon/')
+    .then(response => response.json())
+    .then(data => {
+        Promise.all(data.results.map(pokemon => 
+            fetch(pokemon.url)
+            .then(response => response.json())
+            .then(pokemonData => ({
+                title: pokemonData.name,
+                size: "small",
+                //<html>
+                    //<head></head>
+                    //<body>
+                      //<a href='#'>Ver más</a>
+                    //</body>
+                  //</html>
+                cover: <img src= {pokemonData.sprites.front_shiny} alt={`Imagen de ${pokemonData.name}`} className='img-style'></img>,
+                abilities: pokemonData.abilities
+            }))
+        ))
+        .then(newCardContent => setCardContent(newCardContent));
+    })
+  }, []);
   return (
     <>
     <div className="card-content">
         {card_content.map((card) => {
           return (
             <Card
+              key={card.title}
               className="card-style"
               hoverable
               title={card.title}
-              extra={card.extra}
               size={card.size}
+              cover={card.cover}
             >
               <div>
-                Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero laboriosam commodi rerum reprehenderit consequuntur eius, sit et voluptatem id. Ea sit illo modi quibusdam nam deleniti iste rem voluptatem enim!
+                <p>Habilidades:</p>
+                <ul className='ul-style'>
+                  {card.abilities.map((abilityObj) => (
+                    <li key={abilityObj.ability.name}>{abilityObj.ability.name}</li>
+                  ))}
+                </ul>
               </div>
             </Card>
           );
@@ -71,3 +56,4 @@ export const MyFirstComponents = () => {
     </>
   );
 };
+
